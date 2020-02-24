@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Rein Verification System</title>
+  <script src="face-api.js"></script>
+  <script src="js/commons.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.css">
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="card-panel lime accent-1"><h5><center>Rein Verification System</center></h4></div>
+    <div class="progress" id="loader">
+      <div class="indeterminate"></div>
+    </div>
+    <div class="row side-by-side">  
+      <div class="center-content">
+          <div class="card-panel teal lighten-2" style="width: 300px;"><h5><center>Person Image</center></h4></div>
+          <div style="position: relative" class="margin">
+              <img id="inputImg1" src="default_res/default_person.png" style="height: 300px; image-orientation: from-image;"/>
+              <canvas id="overlay" />
+          </div>
+          <input id="imagePath1" type="file" class="waves-effect btn bold" onchange="loadImageFromPath('#imagePath1', '#inputImg1')" accept=".jpg, .jpeg, .png">
+      </div>
+      
+      <div class="center-content">
+          <div class="card-panel teal lighten-2" style="width: 300px;"><h5><center>KTP Image</center></h4></div>
+          <div style="position: relative" class="margin">
+              <img id="inputImg2" src="default_res/default_ktp.jpg" style="height: 300px; image-orientation: from-image;"/>
+              <canvas id="overlay" />
+          </div>
+          <input id="imagePath2" type="file" class="waves-effect btn bold" onchange="loadImageFromPath('#imagePath2', '#inputImg2')" accept=".jpg, .jpeg, .png">
+      </div>
+
+      <div class="center-content">
+          <div class="card-panel teal lighten-2" style="width: 300px;"><h5><center>Database Image</center></h4></div>
+          <div style="position: relative" class="margin">
+              <img id="inputImg3" src="default_res/default_database.png" style="height: 300px; image-orientation: from-image;"/>
+              <canvas id="overlay" />
+          </div>
+          <input id="imagePath3" type="file" class="waves-effect btn bold" onchange="loadImageFromPath('#imagePath3', '#inputImg3')" accept=".jpg, .jpeg, .png">
+      </div>
+    </div>
+    
+    <div>
+      <center>
+        <button class="btn waves-effect waves-light"
+        onclick="calculateResult()"
+        style="margin-bottom: 5%; margin-top: 5%;">
+            Verify
+        </button>
+      </center>      
+    </div>
+
+    <div class="row side-by-side">
+      <div class="center-content">
+        <label for="result1" style="margin-right: 5%;">
+          <center>
+            <h5>
+              Person and KTP Result
+            </h5>
+          </center>
+        </label>
+        <input disabled value="-" id="result1" type="text" class="bold">
+      </div>
+
+      <div class="center-content">
+          <label for="result2" style="margin-left: 5%;"">
+              <center>
+                <h5>
+                  KTP and Database Result
+                </h5>
+              </center>
+          </label>  
+          <input disabled value="-" id="result2" type="text" class="bold">
+        </div>
+    </div>
+  </div>
+
+  <script>
+    const threshold = 0.6
+    let descriptors = { desc1: null, desc2: null, desc3: null }
+
+    function calculateResult() {
+      let text = '-'
+      let bgColor = '#ffffff'
+      
+      const distance1 = faceapi.utils.round(
+        faceapi.euclideanDistance(descriptors.desc1, descriptors.desc2)
+      )
+
+      const distance2 = faceapi.utils.round(
+        faceapi.euclideanDistance(descriptors.desc2, descriptors.desc3)
+      )
+      
+      if (distance1 > threshold) {
+        text = 'Image not Match'
+        text += ' (' + distance1 + ')'
+        bgColor = '#ce7575'
+      }
+      else{
+        text = 'Image Match'
+        text += ' (' + distance1 + ')'
+        bgColor = '#00FF00'
+      }
+      
+      $('#result1').val(text)
+      $('#result1').css('background-color', bgColor)
+
+      if (distance2 > threshold) {
+        text = 'Image not Match'
+        text += ' (' + distance2 + ')'
+        bgColor = '#ce7575'
+      }
+      else{
+        text = 'Image Match'
+        text += ' (' + distance2 + ')'
+        bgColor = '#00FF00'
+      }
+
+      $('#result2').val(text)
+      $('#result2').css('background-color', bgColor)
+    }
+
+    async function loadImageFromPath(imagePath, imagePlaceholder) {
+      const imgFile = $(imagePath).get(0).files[0]
+      const img = await faceapi.bufferToImage(imgFile)
+      const imgId = imagePlaceholder.replace( /^\D+/g, '')
+      $(imagePlaceholder).get(0).src = img.src
+      
+      const result = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor()
+
+      // Check the Result
+      if (result) {
+        descriptors[`desc${imgId}`] = result[`descriptor`]
+      } else {
+        //No face found in the image
+        window.alert("No face found in the image, please select another image!")
+      }
+    }
+
+    async function run() {
+      await faceapi.loadFaceRecognitionModel()
+      await faceapi.nets.ssdMobilenetv1.loadFromUri('/models')
+      await faceapi.nets.faceLandmark68Net.loadFromUri('/models')
+      $('#loader').hide()
+    }
+
+    $(document).ready(function() {
+      run()
+    })
+
+  </script>
+
+</body>
+</html>
