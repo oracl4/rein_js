@@ -12,4 +12,4 @@ npm install
 npm start
 ```
 
-Open the web app on the localhost:3000/
+Open the web app on the http://localhost:3000/
