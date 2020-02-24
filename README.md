@@ -11,3 +11,5 @@ cd rein_js
 npm install
 npm start
 ```
+
+Open the web app on the localhost:3000/
