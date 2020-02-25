@@ -19,7 +19,7 @@
       <div class="center-content">
           <div class="card-panel teal lighten-2" style="width: 300px;"><h5><center>Person Image</center></h4></div>
           <div style="position: relative" class="margin">
-              <img id="inputImg1" src="default_res/default_person.png" style="height: 300px; image-orientation: from-image;"/>
+              <img id="inputImg1" src="images/default_person.png" style="height: 300px; image-orientation: from-image;"/>
               <canvas id="overlay" />
           </div>
           <input id="imagePath1" type="file" class="waves-effect btn bold" onchange="loadImageFromPath('#imagePath1', '#inputImg1')" accept=".jpg, .jpeg, .png">
@@ -28,7 +28,7 @@
       <div class="center-content">
           <div class="card-panel teal lighten-2" style="width: 300px;"><h5><center>KTP Image</center></h4></div>
           <div style="position: relative" class="margin">
-              <img id="inputImg2" src="default_res/default_ktp.jpg" style="height: 300px; image-orientation: from-image;"/>
+              <img id="inputImg2" src="images/default_ktp.jpg" style="height: 300px; image-orientation: from-image;"/>
               <canvas id="overlay" />
           </div>
           <input id="imagePath2" type="file" class="waves-effect btn bold" onchange="loadImageFromPath('#imagePath2', '#inputImg2')" accept=".jpg, .jpeg, .png">
@@ -37,7 +37,7 @@
       <div class="center-content">
           <div class="card-panel teal lighten-2" style="width: 300px;"><h5><center>Database Image</center></h4></div>
           <div style="position: relative" class="margin">
-              <img id="inputImg3" src="default_res/default_database.png" style="height: 300px; image-orientation: from-image;"/>
+              <img id="inputImg3" src="images/default_database.png" style="height: 300px; image-orientation: from-image;"/>
               <canvas id="overlay" />
           </div>
           <input id="imagePath3" type="file" class="waves-effect btn bold" onchange="loadImageFromPath('#imagePath3', '#inputImg3')" accept=".jpg, .jpeg, .png">
@@ -46,9 +46,11 @@
     
     <div>
       <center>
-        <button class="btn waves-effect waves-light"
+        <button id="verifyButton"
+        class="btn waves-effect waves-light"
         onclick="calculateResult()"
-        style="margin-bottom: 5%; margin-top: 5%;">
+        style="margin-bottom: 5%; margin-top: 5%;"
+        disabled>
             Verify
         </button>
       </center>      
@@ -59,29 +61,27 @@
         <label for="result1" style="margin-right: 5%;">
           <center>
             <h5>
-              Person and KTP Result
+              Verification Result
             </h5>
           </center>
         </label>
-        <input disabled value="-" id="result1" type="text" class="bold">
+        <input disabled value="-" id="result1" type="text" class="bold" style="text-align:center;">
       </div>
-
-      <div class="center-content">
-          <label for="result2" style="margin-left: 5%;"">
-              <center>
-                <h5>
-                  KTP and Database Result
-                </h5>
-              </center>
-          </label>  
-          <input disabled value="-" id="result2" type="text" class="bold">
-        </div>
     </div>
   </div>
 
   <script>
     const threshold = 0.6
     let descriptors = { desc1: null, desc2: null, desc3: null }
+
+    function verifyButtonCheck(){
+      if((descriptors[`desc1`] == null) || (descriptors[`desc2`] == null) || (descriptors[`desc3`] == null)){
+        document.getElementById("verifyButton").disabled = true;
+      }
+      else{
+        document.getElementById("verifyButton").disabled = false;
+      }
+    }
 
     function calculateResult() {
       let text = '-'
@@ -92,53 +92,47 @@
       )
 
       const distance2 = faceapi.utils.round(
+        faceapi.euclideanDistance(descriptors.desc1, descriptors.desc3)
+      )
+      
+      const distance3 = faceapi.utils.round(
         faceapi.euclideanDistance(descriptors.desc2, descriptors.desc3)
       )
       
-      if (distance1 > threshold) {
-        text = 'Image not Match'
-        text += ' (' + distance1 + ')'
-        bgColor = '#ce7575'
+      if (distance1 < threshold && distance2 < threshold && distance3 < threshold) {
+        text = 'Verfication Success'
+        bgColor = '#00FF00'
       }
       else{
-        text = 'Image Match'
-        text += ' (' + distance1 + ')'
-        bgColor = '#00FF00'
+        text = 'Verification Failed'
+        bgColor = '#ce7575'
       }
       
+      console.log("(" + distance1 + ") & (" + distance2 + ") & (" + distance3 + ")")
       $('#result1').val(text)
       $('#result1').css('background-color', bgColor)
-
-      if (distance2 > threshold) {
-        text = 'Image not Match'
-        text += ' (' + distance2 + ')'
-        bgColor = '#ce7575'
-      }
-      else{
-        text = 'Image Match'
-        text += ' (' + distance2 + ')'
-        bgColor = '#00FF00'
-      }
-
-      $('#result2').val(text)
-      $('#result2').css('background-color', bgColor)
     }
 
     async function loadImageFromPath(imagePath, imagePlaceholder) {
       const imgFile = $(imagePath).get(0).files[0]
       const img = await faceapi.bufferToImage(imgFile)
       const imgId = imagePlaceholder.replace( /^\D+/g, '')
-      $(imagePlaceholder).get(0).src = img.src
       
       const result = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor()
+      descriptors[`desc${imgId}`] = null
 
       // Check the Result
       if (result) {
         descriptors[`desc${imgId}`] = result[`descriptor`]
-      } else {
+        $(imagePlaceholder).get(0).src = img.src
+      }
+      else {
         //No face found in the image
         window.alert("No face found in the image, please select another image!")
+        $(imagePlaceholder).get(0).src = 'images/default_false.png'
       }
+      
+      verifyButtonCheck()
     }
 
     async function run() {
