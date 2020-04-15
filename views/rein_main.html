@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Rein Verification System</title>
   <script src="face-api.js"></script>
   <script src="js/commons.js"></script>
@@ -8,64 +9,160 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.css">
   <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+  
+  <!-- Modal Style -->
+  <style>
+    body {font-family: Arial, Helvetica, sans-serif;}
+
+    /* The Modal (background) */
+    .modal {
+      display: none; /* Hidden by default */
+      position: fixed; /* Stay in place */
+      z-index: 1; /* Sit on top */
+      left: 0;
+      top: 0;
+      width: 100%; /* Full width */
+      height: 0%; /* Full height */
+      overflow: auto; /* Enable scroll if needed */ 
+      background-color: rgb(0,0,0); /* Fallback color */
+      background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+      -webkit-animation-name: fadeIn; /* Fade in the background */
+      -webkit-animation-duration: 0.4s;
+      animation-name: fadeIn;
+      animation-duration: 0.4s
+    }
+    
+    /* Modal Content */
+    .modal-content {
+      position: fixed;
+      bottom: 0;
+      background-color: #fefefe;
+      width: 100%;
+      -webkit-animation-name: slideIn;
+      -webkit-animation-duration: 0.4s;
+      animation-name: slideIn;
+      animation-duration: 0.4s
+    }
+    
+    /* The Close Button */
+    .close {
+      color: white;
+      float: right;
+      font-size: 30px;
+      font-weight: bold;
+    }
+    
+    .close:hover,
+    .close:focus {
+      color: #000;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    
+    .modal-header {
+      padding: 4px 4px;
+      background-color: #00FF00;
+      color: black;
+      vertical-align: middle;
+    }
+    
+    .modal-body {
+      padding: 4px 4px;
+      vertical-align: middle;
+    }
+    
+    .modal-footer {
+      background-color: #00FF00;
+      color: black;
+    }
+    
+    /* Add Animation */
+    @-webkit-keyframes slideIn {
+      from {bottom: -200px; opacity: 0} 
+      to {bottom: 0; opacity: 1}
+    }
+    
+    @keyframes slideIn {
+      from {bottom: -200px; opacity: 0}
+      to {bottom: 0; opacity: 1}
+    }
+    
+    @-webkit-keyframes fadeIn {
+      from {opacity: 0} 
+      to {opacity: 1}
+    }
+    
+    @keyframes fadeIn {
+      from {opacity: 0} 
+      to {opacity: 1}
+    }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <div class="card-panel lime accent-1"><h5><center>Rein Verification System</center></h4></div>
-    <div class="progress" id="loader">
-      <div class="indeterminate"></div>
-    </div>
-    <div class="row side-by-side">  
-      <div class="center-content">
-          <div class="card-panel teal lighten-2" style="width: 300px;"><h5><center>Person Image</center></h4></div>
-          <div style="position: relative" class="margin">
-              <img id="inputImg1" src="images/default_person.png" style="height: 300px; image-orientation: from-image;"/>
-              <canvas id="overlay" />
-          </div>
-          <input id="imagePath1" type="file" class="waves-effect btn bold" onchange="loadImageFromPath('#imagePath1', '#inputImg1')" accept=".jpg, .jpeg, .png">
+  <div>
+    <div class="container">
+      <div class="card-panel lime accent-1"><h5><center>Rein Verification System</center></h4></div>
+      <div class="progress" id="loader">
+        <div class="indeterminate"></div>
       </div>
-      
-      <div class="center-content">
-          <div class="card-panel teal lighten-2" style="width: 300px;"><h5><center>KTP Image</center></h4></div>
-          <div style="position: relative" class="margin">
-              <img id="inputImg2" src="images/default_ktp.jpg" style="height: 300px; image-orientation: from-image;"/>
-              <canvas id="overlay" />
-          </div>
-          <input id="imagePath2" type="file" class="waves-effect btn bold" onchange="loadImageFromPath('#imagePath2', '#inputImg2')" accept=".jpg, .jpeg, .png">
+      <div class="row side-by-side">  
+        <div class="center-content">
+            <div class="card-panel teal lighten-2" style="width: 300px;"><h5><center>Person Image</center></h4></div>
+            <div style="position: relative" class="margin">
+                <img id="inputImg1" src="images/default_person.png" style="height: 300px; image-orientation: from-image;"/>
+                <canvas id="overlay" />
+            </div>
+            <input id="imagePath1" type="file" class="waves-effect btn bold" onchange="loadImageFromPath('#imagePath1', '#inputImg1')" accept=".jpg, .jpeg, .png">
+        </div>
+        
+        <div class="center-content">
+            <div class="card-panel teal lighten-2" style="width: 300px;"><h5><center>KTP Image</center></h4></div>
+            <div style="position: relative" class="margin">
+                <img id="inputImg2" src="images/default_ktp.jpg" style="height: 300px; image-orientation: from-image;"/>
+                <canvas id="overlay" />
+            </div>
+            <input id="imagePath2" type="file" class="waves-effect btn bold" onchange="loadImageFromPath('#imagePath2', '#inputImg2')" accept=".jpg, .jpeg, .png">
+        </div>
+  
+        <div class="center-content">
+            <div class="card-panel teal lighten-2" style="width: 300px;"><h5><center>Database Image</center></h4></div>
+            <div style="position: relative" class="margin">
+                <img id="inputImg3" src="images/default_database.png" style="height: 300px; image-orientation: from-image;"/>
+                <canvas id="overlay" />
+            </div>
+            <input id="imagePath3" type="file" class="waves-effect btn bold" onchange="loadImageFromPath('#imagePath3', '#inputImg3')" accept=".jpg, .jpeg, .png">
+        </div>
       </div>
 
-      <div class="center-content">
-          <div class="card-panel teal lighten-2" style="width: 300px;"><h5><center>Database Image</center></h4></div>
-          <div style="position: relative" class="margin">
-              <img id="inputImg3" src="images/default_database.png" style="height: 300px; image-orientation: from-image;"/>
-              <canvas id="overlay" />
-          </div>
-          <input id="imagePath3" type="file" class="waves-effect btn bold" onchange="loadImageFromPath('#imagePath3', '#inputImg3')" accept=".jpg, .jpeg, .png">
+      <div>
+        <center>
+          <button id="verifyButton"
+          class="btn waves-effect waves-light"
+          onclick="calculateResult()"
+          style="margin-bottom: 5%; margin-top: 5%;"
+          disabled>
+              Verify
+          </button>
+        </center>      
       </div>
-    </div>
-    
-    <div>
-      <center>
-        <button id="verifyButton"
-        class="btn waves-effect waves-light"
-        onclick="calculateResult()"
-        style="margin-bottom: 5%; margin-top: 5%;"
-        disabled>
-            Verify
-        </button>
-      </center>      
-    </div>
-
-    <div class="row side-by-side">
-      <div class="center-content">
-        <label for="result1" style="margin-right: 5%;">
+    </div>  
+  </div>
+  <div>
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+      <!-- Modal content -->
+      <div class="modal-content">
+        <div class="modal-header"id="modal-title">
+          <span class="close">&times;</span>
           <center>
-            <h5>
-              Verification Result
-            </h5>
+            <h3 id="result1">Verification Title</h3>
           </center>
-        </label>
-        <input disabled value="-" id="result1" type="text" class="bold" style="text-align:center;">
+        </div>
+        <div class="modal-body">
+          <center>
+            <h5 id="result2">Verification Content</h5>
+          </center>
+        </div>
       </div>
     </div>
   </div>
@@ -73,7 +170,25 @@
   <script>
     const threshold = 0.6
     let descriptors = { desc1: null, desc2: null, desc3: null }
+    
+    // Get the modal
+    var modal = document.getElementById("myModal");
 
+    // Get the <span> element that closes the modal
+    var span = document.getElementsByClassName("close")[0];
+
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function() {
+      modal.style.display = "none";
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
+    
     function verifyButtonCheck(){
       if((descriptors[`desc1`] == null) || (descriptors[`desc2`] == null) || (descriptors[`desc3`] == null)){
         document.getElementById("verifyButton").disabled = true;
@@ -86,6 +201,7 @@
     function calculateResult() {
       let text = '-'
       let bgColor = '#ffffff'
+      let weblink = 'http://www.google.com'
       
       const distance1 = faceapi.utils.round(
         faceapi.euclideanDistance(descriptors.desc1, descriptors.desc2)
@@ -100,17 +216,29 @@
       )
       
       if (distance1 < threshold && distance2 < threshold && distance3 < threshold) {
-        text = 'Verfication Success'
+        text1 = 'Verfication Success'
+        text2 = 'Redirecting to ' + weblink
         bgColor = '#00FF00'
       }
       else{
-        text = 'Verification Failed'
-        bgColor = '#ce7575'
+        text1 = 'Verification Failed'
+        text2 = 'Please retry the verification using another image'
+        bgColor = '#FF0000'
       }
-      
+
+      document.getElementById("result1").innerHTML = text1;
+      document.getElementById("result2").innerHTML = text2;
+      document.getElementById("modal-title").style.backgroundColor = bgColor;
+
+      modal.style.display = "block";
+
       console.log("(" + distance1 + ") & (" + distance2 + ") & (" + distance3 + ")")
-      $('#result1').val(text)
-      $('#result1').css('background-color', bgColor)
+
+      if (distance1 < threshold && distance2 < threshold && distance3 < threshold) {
+        setTimeout(() => { 
+          window.location.href = weblink;
+          }, 3000);
+      }
     }
 
     async function loadImageFromPath(imagePath, imagePlaceholder) {

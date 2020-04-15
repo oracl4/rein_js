@@ -13,7 +13,8 @@ app.use(express.static(path.join(__dirname, './public')))
 app.use(express.static(path.join(__dirname, './public/models')))
 app.use(express.static(path.join(__dirname, './dist')))
 
-app.get('/', (req, res) => res.redirect('/rein_main'))
+app.get('/', (req, res) => res.redirect('/rein_login'))
+app.get('/rein_login', (req, res) => res.sendFile(path.join(viewsDir, 'rein_login.html')))
 app.get('/rein_main', (req, res) => res.sendFile(path.join(viewsDir, 'rein_main.html')))
 
 app.post('/fetch_external_image', async (req, res) => {
